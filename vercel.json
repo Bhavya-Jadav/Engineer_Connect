@@ -23,6 +23,16 @@
       "destination": "/server/server.js"
     }
   ],
+  "env": {
+    "NODE_ENV": "production",
+    "REACT_APP_API_BASE_URL": ""
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "REACT_APP_API_BASE_URL": ""
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",
@@ -62,15 +72,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "REACT_APP_API_BASE_URL": ""
-  },
-  "build": {
-    "env": {
-      "NODE_ENV": "production",
-      "REACT_APP_API_BASE_URL": ""
-    }
-  }
+  ]
 }
