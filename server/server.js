@@ -16,9 +16,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- Middleware ---
-// CORS Configuration for Vercel Production (Temporary - Allow All Origins)
+// CORS Configuration for Vercel Production
 app.use(cors({
-  origin: true, // Allow all origins temporarily
+  origin: [
+    'http://localhost:3000', // Local development
+    'https://engineer-connect.vercel.app', // Your actual frontend URL
+    /\.vercel\.app$/ // Allow any Vercel subdomain
+  ],
   credentials: true, // Allow cookies
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
