@@ -16,7 +16,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- Middleware ---
-app.use(cors()); // Enable CORS for all routes
+// CORS Configuration for Vercel Production (Temporary - Allow All Origins)
+app.use(cors({
+  origin: true, // Allow all origins temporarily
+  credentials: true, // Allow cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  optionsSuccessStatus: 200 // For legacy browser support
+}));
+
 app.use(express.json()); // Parse JSON bodies
 app.use(fileUpload({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit

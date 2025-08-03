@@ -94,7 +94,9 @@ function AppContent() {
       const apiUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/problems`;
       console.log('Fetching problems from:', apiUrl);
       
-      const response = await fetch(apiUrl);
+      const response = await fetch(apiUrl, {
+        credentials: 'include' // Include cookies for cross-domain
+      });
       console.log('Problems response status:', response.status);
       console.log('Problems response ok:', response.ok);
       
@@ -119,6 +121,7 @@ function AppContent() {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Include cookies for cross-domain authentication
         body: JSON.stringify({ username, password }),
       });
       
@@ -291,6 +294,7 @@ function AppContent() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include', // Include cookies for cross-domain
         body: JSON.stringify({
           company: companyName,
           branch: formData.branch,
