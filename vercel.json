@@ -11,7 +11,10 @@
     },
     {
       "src": "server/server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
     }
   ],
   "routes": [
@@ -36,11 +39,6 @@
     "env": {
       "NODE_ENV": "production",
       "REACT_APP_API_BASE_URL": ""
-    }
-  },
-  "functions": {
-    "server/server.js": {
-      "maxDuration": 30
     }
   },
   "headers": [
