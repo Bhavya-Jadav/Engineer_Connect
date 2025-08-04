@@ -400,7 +400,7 @@ const CompanyDashboard = ({
       console.log('🔑 CLIENT: Token exists?', !!token);
       console.log('🔑 CLIENT: Token preview:', token ? token.substring(0, 30) + '...' : 'NO TOKEN');
       
-      const response = await fetch(`http://localhost:5000/api/ideas/problem/${problemId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'}/ideas/problem/${problemId}`, {
         method: 'GET',
         headers: { 
           'Authorization': `Bearer ${token}`,

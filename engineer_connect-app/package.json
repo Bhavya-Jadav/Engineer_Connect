@@ -18,7 +18,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:production": "REACT_APP_API_BASE_URL=https://your-vercel-domain.vercel.app/api react-scripts build"
   },
   "eslintConfig": {
     "extends": [
