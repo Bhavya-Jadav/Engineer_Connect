@@ -19,6 +19,10 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/static/(.*)",
+      "dest": "/engineer_connect-app/build/static/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/engineer_connect-app/build/index.html"
     }
