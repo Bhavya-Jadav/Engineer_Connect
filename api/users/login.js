@@ -1,30 +1,4 @@
 // api/users/login.js
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-// Import User model
-const User = require('../../server/models/User');
-
-// Connect to MongoDB
-let isConnected = false;
-
-const connectDB = async () => {
-  if (isConnected) return;
-  
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      bufferCommands: false,
-      maxPoolSize: 1,
-    });
-    isConnected = true;
-    console.log('✅ MongoDB connected for login');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    throw error;
-  }
-};
-
 module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -40,7 +14,31 @@ module.exports = async (req, res) => {
   }
 
   try {
-    await connectDB();
+    // Import modules inside the function to avoid cold start issues
+    const mongoose = require('mongoose');
+    const bcrypt = require('bcryptjs');
+    const jwt = require('jsonwebtoken');
+
+    // Connect to MongoDB
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(process.env.MONGO_URI, {
+        bufferCommands: false,
+        maxPoolSize: 1,
+      });
+    }
+
+    // Define User schema inline to avoid import issues
+    const userSchema = new mongoose.Schema({
+      name: String,
+      email: String,
+      password: String,
+      role: String,
+      company: String,
+      branch: String,
+      points: { type: Number, default: 0 }
+    });
+
+    const User = mongoose.models.User || mongoose.model('User', userSchema);
 
     const { email, password } = req.body;
 
@@ -87,6 +85,6 @@ module.exports = async (req, res) => {
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 };

@@ -11,21 +11,8 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/engineer_connect-app/build/static/$1"
-    },
-    {
       "src": "/(.*)",
       "dest": "/engineer_connect-app/build/index.html"
     }
-  ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  ]
 }
