@@ -38,6 +38,17 @@ const CompanyDashboard = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingIdeas, setIsLoadingIdeas] = useState(false);
   const [newTag, setNewTag] = useState(''); // For adding new tags
+  const [searchTerm, setSearchTerm] = useState(''); // For company search
+  const [filteredProblems, setFilteredProblems] = useState([]); // For filtered results
+  
+  // Admin Ideas states
+  const [showAllIdeas, setShowAllIdeas] = useState(false);
+  const [allIdeas, setAllIdeas] = useState([]);
+  const [isLoadingAllIdeas, setIsLoadingAllIdeas] = useState(false);
+  const [ideasSearchTerm, setIdeasSearchTerm] = useState(''); // For searching ideas
+  
+  // Skills filter for individual problem ideas
+  const [skillsFilter, setSkillsFilter] = useState(''); // For filtering by skills
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -439,6 +450,37 @@ const CompanyDashboard = ({
     }
   };
 
+  // Admin function to fetch all ideas from all companies
+  const handleViewAllIdeas = async () => {
+    setIsLoadingAllIdeas(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'}/ideas`, {
+        method: 'GET',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error: ${response.status} - ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('💡 All ideas received count:', data.length);
+      
+      setAllIdeas(data);
+      setShowAllIdeas(true);
+    } catch (error) {
+      alert(`Error fetching all ideas: ${error.message}`);
+    } finally {
+      setIsLoadingAllIdeas(false);
+    }
+  };
+
   const renderStudentProfile = (student) => {
     if (!student) {
       return (
@@ -722,6 +764,176 @@ const CompanyDashboard = ({
     );
   }
 
+  // Show all ideas view for admin
+  if (showAllIdeas) {
+    // Filter ideas based on search term
+    const filteredIdeas = allIdeas.filter(idea => 
+      idea.problem?.company?.toLowerCase().includes(ideasSearchTerm.toLowerCase()) ||
+      idea.problem?.title?.toLowerCase().includes(ideasSearchTerm.toLowerCase()) ||
+      idea.student?.name?.toLowerCase().includes(ideasSearchTerm.toLowerCase()) ||
+      idea.student?.university?.toLowerCase().includes(ideasSearchTerm.toLowerCase()) ||
+      idea.ideaText?.toLowerCase().includes(ideasSearchTerm.toLowerCase())
+    );
+
+    return (
+      <div className="company-dashboard">
+        <Header 
+          isLoggedIn={isLoggedIn} 
+          currentUser={currentUser} 
+          userRole={userRole} 
+          handleLogout={handleLogout} 
+          setCurrentView={setCurrentView}
+          currentView="companyDashboard"
+          handleBack={() => setShowAllIdeas(false)}
+          onProfileClick={onProfileClick}
+        />
+        
+        <div className="all-ideas-view-container">
+          <div className="ideas-header-section">
+            <div className="breadcrumb">
+              <span onClick={() => setShowAllIdeas(false)} className="breadcrumb-link">
+                <i className="fas fa-arrow-left"></i> Back to Dashboard
+              </span>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-current">All Ideas from All Companies</span>
+            </div>
+            
+            {/* Search for ideas */}
+            <div className="search-section">
+              <div className="search-container">
+                <div className="search-input-wrapper">
+                  <i className="fas fa-search search-icon"></i>
+                  <input
+                    type="text"
+                    placeholder="Search ideas by company, problem, student, or content..."
+                    value={ideasSearchTerm}
+                    onChange={(e) => setIdeasSearchTerm(e.target.value)}
+                    className="search-input"
+                  />
+                  {ideasSearchTerm && (
+                    <button 
+                      onClick={() => setIdeasSearchTerm('')}
+                      className="search-clear-btn"
+                      title="Clear search"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+                {ideasSearchTerm && (
+                  <div className="search-results-info">
+                    <i className="fas fa-info-circle"></i>
+                    Found {filteredIdeas.length} idea(s) matching "{ideasSearchTerm}"
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="ideas-overview-stats">
+              <h2>
+                <i className="fas fa-lightbulb"></i> 
+                All Student Ideas ({filteredIdeas.length})
+              </h2>
+              <p>Ideas submitted by students across all companies</p>
+            </div>
+          </div>
+
+          <div className="ideas-list-container">
+            {filteredIdeas.length > 0 ? (
+              filteredIdeas.map((idea) => (
+                <div key={idea._id} className="idea-card admin-idea-card">
+                  <div className="idea-card-header">
+                    <div className="problem-info">
+                      <h3 className="problem-title-link">
+                        <i className="fas fa-briefcase"></i>
+                        {idea.problem?.company} - {idea.problem?.title}
+                      </h3>
+                      <span className="branch-badge">{idea.problem?.branch}</span>
+                    </div>
+                    <div className="submission-date">
+                      <i className="fas fa-calendar"></i>
+                      {new Date(idea.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  
+                  <div className="student-info-compact">
+                    <div className="student-avatar">
+                      {idea.student?.profilePicture ? (
+                        <img src={idea.student.profilePicture} alt="Student" />
+                      ) : (
+                        <div className="default-avatar">
+                          {idea.student?.name?.charAt(0) || 'S'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="student-details">
+                      <strong>{idea.student?.name || 'Unknown Student'}</strong>
+                      <div className="student-meta">
+                        {idea.student?.university && (
+                          <span><i className="fas fa-university"></i> {idea.student.university}</span>
+                        )}
+                        {idea.student?.course && (
+                          <span><i className="fas fa-graduation-cap"></i> {idea.student.course}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="idea-content-preview">
+                    <h4><i className="fas fa-lightbulb"></i> Solution</h4>
+                    <p className="idea-text-preview">
+                      {idea.ideaText?.length > 200 
+                        ? `${idea.ideaText.substring(0, 200)}...` 
+                        : idea.ideaText
+                      }
+                    </p>
+                    
+                    {idea.implementationApproach && (
+                      <div className="implementation-preview">
+                        <h5><i className="fas fa-cogs"></i> Implementation</h5>
+                        <p>
+                          {idea.implementationApproach?.length > 150 
+                            ? `${idea.implementationApproach.substring(0, 150)}...` 
+                            : idea.implementationApproach
+                          }
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {idea.student?.skills?.length > 0 && (
+                    <div className="student-skills-compact">
+                      <strong>Skills:</strong>
+                      <div className="skills-tags">
+                        {idea.student.skills.slice(0, 3).map((skill, index) => (
+                          <span key={index} className="skill-tag">{skill}</span>
+                        ))}
+                        {idea.student.skills.length > 3 && (
+                          <span className="skill-tag more">+{idea.student.skills.length - 3} more</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="no-ideas-found">
+                <i className="fas fa-search"></i>
+                <h3>No Ideas Found</h3>
+                <p>
+                  {ideasSearchTerm 
+                    ? `No ideas match your search "${ideasSearchTerm}"` 
+                    : 'No ideas have been submitted yet across any company.'
+                  }
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Show ideas for selected problem
   if (selectedProblemForIdeas) {
     return (
@@ -793,10 +1005,55 @@ const CompanyDashboard = ({
                 </span>
               </h2>
             </div>
+
+            {/* Skills Filter Search Bar */}
+            <div className="skills-filter-section">
+              <div className="skills-search-container">
+                <div className="skills-search-input-wrapper">
+                  <i className="fas fa-tags skills-search-icon"></i>
+                  <input
+                    type="text"
+                    placeholder="Filter students by skills (e.g., React, Python, Machine Learning)..."
+                    value={skillsFilter}
+                    onChange={(e) => setSkillsFilter(e.target.value)}
+                    className="skills-search-input"
+                  />
+                  {skillsFilter && (
+                    <button 
+                      onClick={() => setSkillsFilter('')}
+                      className="skills-search-clear-btn"
+                      title="Clear filter"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+                {skillsFilter && (
+                  <div className="skills-filter-info">
+                    <i className="fas fa-filter"></i>
+                    Filtering by skills containing "{skillsFilter}"
+                  </div>
+                )}
+              </div>
+            </div>
             
             <div className="solutions-grid">
-              {selectedProblemForIdeas.ideas && selectedProblemForIdeas.ideas.length > 0 ? (
-                selectedProblemForIdeas.ideas.map((idea, index) => {
+              {selectedProblemForIdeas.ideas && selectedProblemForIdeas.ideas.length > 0 ? (() => {
+                // Filter ideas based on skills
+                const filteredIdeas = selectedProblemForIdeas.ideas.filter(idea => {
+                  if (!skillsFilter.trim()) return true; // Show all if no filter
+                  
+                  const studentSkills = idea.student?.skills || [];
+                  const filterTerm = skillsFilter.toLowerCase().trim();
+                  
+                  // Check if any skill contains the filter term
+                  return studentSkills.some(skill => 
+                    skill.toLowerCase().includes(filterTerm)
+                  );
+                });
+
+                return filteredIdeas.length > 0 ? (
+                  filteredIdeas.map((idea, index) => {
                   return (
                     <div key={idea._id || index} className="solution-card">
                       <div className="solution-header">
@@ -912,8 +1169,20 @@ const CompanyDashboard = ({
                       </div>
                     </div>
                   );
-                })
-              ) : (
+                }) 
+                ) : (
+                  <div className="no-solutions-container">
+                    <div className="no-solutions-illustration">
+                      <i className="fas fa-search"></i>
+                    </div>
+                    <div className="no-solutions-content">
+                      <h3>No Matching Solutions</h3>
+                      <p>No students found with skills matching "{skillsFilter}".</p>
+                      <p>Try adjusting your search or clear the filter to see all solutions.</p>
+                    </div>
+                  </div>
+                );
+              })() : (
                 <div className="no-solutions-container">
                   <div className="no-solutions-illustration">
                     <i className="fas fa-search"></i>
@@ -932,23 +1201,36 @@ const CompanyDashboard = ({
     );
   }
 
-  // Filter problems to show only those posted by current company user
+  // Filter problems based on user role
   const companyName = currentUser?.companyName || currentUser?.username || 'Company User';
   
   console.log('CompanyDashboard - Raw problems received:', problems);
   console.log('CompanyDashboard - Number of raw problems:', problems?.length || 0);
   console.log('CompanyDashboard - Current user:', currentUser);
   console.log('CompanyDashboard - Current user ID:', currentUser?._id);
+  console.log('CompanyDashboard - User role:', userRole);
   
-  // Company users can only see problems they posted
-  const companyProblems = problems.filter(problem => {
-    const isOwnedByUser = problem.postedBy === currentUser?._id;
-    console.log('CompanyDashboard - Checking problem:', problem.title, 'postedBy:', problem.postedBy, 'currentUserId:', currentUser?._id, 'matches:', isOwnedByUser);
-    return isOwnedByUser;
-  });
+  // Admin users can see ALL problems, company users can only see problems they posted
+  let companyProblems = userRole === 'admin' 
+    ? problems // Admins see all problems
+    : problems.filter(problem => {
+        const isOwnedByUser = problem.postedBy === currentUser?._id;
+        console.log('CompanyDashboard - Checking problem:', problem.title, 'postedBy:', problem.postedBy, 'currentUserId:', currentUser?._id, 'matches:', isOwnedByUser);
+        return isOwnedByUser;
+      });
+
+  // Apply search filter for admins
+  if (userRole === 'admin' && searchTerm.trim() !== '') {
+    companyProblems = companyProblems.filter(problem => 
+      problem.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      problem.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      problem.branch?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
   
-  console.log('CompanyDashboard - Filtered company problems:', companyProblems);
+  console.log('CompanyDashboard - Filtered problems for', userRole + ':', companyProblems);
   console.log('CompanyDashboard - Number of company problems:', companyProblems.length);
+  console.log('CompanyDashboard - Search term:', searchTerm);
 
   // Main dashboard view
   return (
@@ -966,12 +1248,66 @@ const CompanyDashboard = ({
       
       <div className="dashboard-content">
         <div className="dashboard-header">
-          <h2><i className="fas fa-tachometer-alt"></i> Company Dashboard</h2>
-          <p className="dashboard-subtitle">Logged in as: {companyName}</p>
+          <h2>
+            <i className="fas fa-tachometer-alt"></i> 
+            {userRole === 'admin' ? 'Admin Dashboard' : 'Company Dashboard'}
+          </h2>
+          <p className="dashboard-subtitle">
+            {userRole === 'admin' 
+              ? `Logged in as Admin: ${companyName} - Viewing all problems from all companies` 
+              : `Logged in as: ${companyName}`
+            }
+          </p>
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
             <i className="fas fa-plus-circle"></i> {showForm ? 'Cancel' : 'Post New Problem'}
           </button>
+          
+          {/* Admin Ideas Button */}
+          {userRole === 'admin' && (
+            <button 
+              className="btn btn-secondary" 
+              onClick={handleViewAllIdeas}
+              disabled={isLoadingAllIdeas}
+              style={{ marginLeft: '1rem' }}
+            >
+              <i className="fas fa-lightbulb"></i> 
+              {isLoadingAllIdeas ? 'Loading...' : 'View All Ideas'}
+            </button>
+          )}
         </div>
+
+        {/* Search Bar - Only show for admins */}
+        {userRole === 'admin' && (
+          <div className="search-section">
+            <div className="search-container">
+              <div className="search-input-wrapper">
+                <i className="fas fa-search search-icon"></i>
+                <input
+                  type="text"
+                  placeholder="Search by company name, problem title, or branch..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+                {searchTerm && (
+                  <button 
+                    className="clear-search-btn"
+                    onClick={() => setSearchTerm('')}
+                    title="Clear search"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                )}
+              </div>
+              {searchTerm && (
+                <div className="search-results-info">
+                  <i className="fas fa-info-circle"></i>
+                  Found {companyProblems.length} problem(s) matching "{searchTerm}"
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {showForm && (
           <div className="post-form">
@@ -1297,7 +1633,10 @@ const CompanyDashboard = ({
         )}
 
         <div className="posted-problems">
-          <h3><i className="fas fa-tasks"></i> Your Posted Problems</h3>
+          <h3>
+            <i className="fas fa-tasks"></i> 
+            {userRole === 'admin' ? 'All Company Problems' : 'Your Posted Problems'}
+          </h3>
           <div className="problems-list">
             {companyProblems && companyProblems.length > 0 ? (
               companyProblems.map(problem => (
@@ -1305,6 +1644,20 @@ const CompanyDashboard = ({
                   <div className="problem-content">
                     <div className="problem-info">
                       <h4>{problem.title}</h4>
+                      {userRole === 'admin' && (
+                        <div className="company-info" style={{
+                          color: '#2563eb', 
+                          fontSize: '0.9rem', 
+                          fontWeight: '600', 
+                          marginBottom: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}>
+                          <i className="fas fa-building"></i>
+                          <span>Posted by: {problem.company}</span>
+                        </div>
+                      )}
                       <p>{problem.description}</p>
                       <div className="problem-meta">
                         <span className="branch-badge">{problem.branch}</span>
@@ -1315,13 +1668,18 @@ const CompanyDashboard = ({
                       </div>
                     </div>
                     <div className="problem-actions">
-                      <button 
-                        className="btn btn-secondary" 
-                        onClick={() => handleEditProblem(problem)}
-                      >
-                        <i className="fas fa-edit"></i> 
-                        Edit
-                      </button>
+                      {/* Admins can edit all problems, companies can only edit their own */}
+                      {(userRole === 'admin' || problem.postedBy === currentUser?._id) && (
+                        <button 
+                          className="btn btn-secondary" 
+                          onClick={() => handleEditProblem(problem)}
+                        >
+                          <i className="fas fa-edit"></i> 
+                          Edit
+                        </button>
+                      )}
+                      
+                      {/* Everyone can view ideas */}
                       <button 
                         className="btn btn-primary" 
                         onClick={() => handleViewIdeas(problem._id)}
@@ -1339,7 +1697,9 @@ const CompanyDashboard = ({
                           </>
                         )}
                       </button>
-                      {onDeleteProblem && (
+                      
+                      {/* Admins can delete all problems, companies can only delete their own */}
+                      {onDeleteProblem && (userRole === 'admin' || problem.postedBy === currentUser?._id) && (
                         <button 
                           className="btn btn-danger" 
                           onClick={() => onDeleteProblem(problem._id, problem.title)}
@@ -1354,10 +1714,35 @@ const CompanyDashboard = ({
               ))
             ) : (
               <div className="no-problems">
-                <div className="no-problems-icon">📝</div>
-                <h4>No problems posted yet</h4>
-                <p>Create your first engineering challenge above to get started!</p>
-                {problems.length > 0 && (
+                <div className="no-problems-icon">
+                  {userRole === 'admin' && searchTerm ? '�' : '�📝'}
+                </div>
+                <h4>
+                  {userRole === 'admin' && searchTerm
+                    ? `No problems found matching "${searchTerm}"`
+                    : userRole === 'admin' 
+                      ? 'No problems found in the database' 
+                      : 'No problems posted yet'
+                  }
+                </h4>
+                <p>
+                  {userRole === 'admin' && searchTerm
+                    ? 'Try adjusting your search terms or search for a different company name, problem title, or branch.'
+                    : userRole === 'admin'
+                      ? 'No companies have posted any engineering challenges yet. Check back later or encourage companies to post their problems!'
+                      : 'Create your first engineering challenge above to get started!'
+                  }
+                </p>
+                {userRole === 'admin' && searchTerm && (
+                  <button 
+                    className="btn btn-secondary"
+                    onClick={() => setSearchTerm('')}
+                    style={{ marginTop: '1rem' }}
+                  >
+                    <i className="fas fa-times"></i> Clear Search
+                  </button>
+                )}
+                {userRole !== 'admin' && problems.length > 0 && (
                   <p style={{ color: '#ff6b6b', marginTop: '10px' }}>
                     <strong>Note:</strong> There are {problems.length} problems in the database, but none were posted by you.
                   </p>

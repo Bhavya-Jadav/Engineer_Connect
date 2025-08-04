@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "server/**/*.js",
+      "src": "server/server.js",
       "use": "@vercel/node"
     },
     {
@@ -25,10 +25,5 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "functions": {
-    "server/server.js": {
-      "maxDuration": 30
-    }
   }
 }

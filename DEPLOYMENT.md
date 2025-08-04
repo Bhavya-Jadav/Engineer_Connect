@@ -1,9 +1,25 @@
 # 🚀 Engineer Connect - Complete Vercel Deployment Guide
 
+## ✅ D```
+MONGO_URI=mongodb+srv://bhavyajadav:bhavyajadav@bhavya.alzjfml.mongodb.net/
+JWT_SECRET=b2f8235464f12f8aea2ea15ef8df3ffdee56ca8e70c5026283a55acb4702e3d377517ac82cd931dea72f1b6988aac4a385e4f61aadd7e517f7568d33993606f4f
+NODE_ENV=production
+PORT=5000
+REACT_APP_API_BASE_URL=http://backend-eosin-eight-92.vercel.app/api
+```NT PREPARATION COMPLETE
+
+All necessary fixes have been implemented:
+- ✅ `server/package.json` - Production-ready with Node.js 18.x engine
+- ✅ `engineer_connect-app/package.json` - Testing libraries moved to devDependencies  
+- ✅ `server/server.js` - Conditional dotenv loading for production
+- ✅ `.gitignore` - Comprehensive file exclusions
+- ✅ Generated secure JWT secret: `b2f8235464f12f8aea2ea15ef8df3ffdee56ca8e70c5026283a55acb4702e3d377517ac82cd931dea72f1b6988aac4a385e4f61aadd7e517f7568d33993606f4f`
+
 ## Prerequisites
 - Node.js installed on your machine
-- Git repository with your code
+- Git repository with your code  
 - Vercel account (free tier works)
+- MongoDB Atlas cluster configured
 
 ## 📋 Pre-Deployment Checklist
 
@@ -55,10 +71,11 @@ vercel
 Set these in Vercel Dashboard → Project → Settings → Environment Variables:
 
 ```
-MONGO_URI=mongodb+srv://Bhavya_Jadav:bhavyajadav@bhavya.alzjfml.mongodb.net/?retryWrites=true&w=majority&appName=Bhavya
-JWT_SECRET=mySuperSecretKey123
+MONGO_URI=mongodb+srv://bhavyajadav:bhavyajadav@bhavya.alzjfml.mongodb.net/
+JWT_SECRET=b2f8235464f12f8aea2ea15ef8df3ffdee56ca8e70c5026283a55acb4702e3d377517ac82cd931dea72f1b6988aac4a385e4f61aadd7e517f7568d33993606f4f
 NODE_ENV=production
 PORT=5000
+REACT_APP_API_BASE_URL=https://your-vercel-domain.vercel.app/api
 ```
 
 ## 📱 Post-Deployment Configuration

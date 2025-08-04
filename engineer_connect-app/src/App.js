@@ -91,7 +91,7 @@ function AppContent() {
 
   const fetchProblems = async () => {
     try {
-      const apiUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/problems`;
+      const apiUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'}/problems`;
       console.log('Fetching problems from:', apiUrl);
       
       const response = await fetch(apiUrl);
@@ -116,7 +116,7 @@ function AppContent() {
   // === AUTHENTICATION HANDLERS ===
   const handleLogin = async (username, password) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/users/login`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -183,7 +183,7 @@ function AppContent() {
 
       console.log('🔨 SIGNUP DEBUG - Payload being sent:', signupPayload);
 
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/users/register`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'}/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(signupPayload),
@@ -285,7 +285,7 @@ function AppContent() {
       const token = localStorage.getItem('token');
       const companyName = currentUser?.companyName || currentUser?.username || 'Anonymous Company';
       
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/problems`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'}/problems`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -332,7 +332,7 @@ function AppContent() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/problems/${problemId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'}/problems/${problemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -388,7 +388,7 @@ function AppContent() {
         implementationApproach: ideaSubmission.implementationApproach.trim()
       };
       
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/ideas`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'}/ideas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
