@@ -2,10 +2,6 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node"
-    },
-    {
       "src": "engineer_connect-app/package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -16,7 +12,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/api/$1"
     },
     {
       "src": "/static/(.*)",
@@ -27,7 +23,9 @@
       "dest": "/engineer_connect-app/build/index.html"
     }
   ],
-  "env": {
-    "NODE_ENV": "production"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
   }
 }
