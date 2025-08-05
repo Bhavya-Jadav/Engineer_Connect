@@ -29,39 +29,48 @@ module.exports = async (req, res) => {
 
     // Define User schema inline to avoid import issues
     const userSchema = new mongoose.Schema({
+      username: { type: String, required: true, unique: true },
       name: String,
       email: String,
       password: String,
       role: String,
+      university: String,
       company: String,
+      companyName: String,
       branch: String,
-      points: { type: Number, default: 0 }
+      points: { type: Number, default: 0 },
+      bio: String,
+      phone: String,
+      course: String,
+      year: String,
+      profilePicture: String
     });
 
     const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-    const { email, password } = req.body;
+    const { email: username, password } = req.body; // Frontend sends as 'email' but it's actually username
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    // Find user by email
-    const user = await User.findOne({ email });
+    // Find user by username
+    const user = await User.findOne({ username });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid username or password' });
     }
 
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid username or password' });
     }
 
     // Generate JWT token
     const token = jwt.sign(
       { 
         userId: user._id, 
+        username: user.username,
         email: user.email,
         role: user.role 
       },
@@ -72,15 +81,20 @@ module.exports = async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        company: user.company,
-        branch: user.branch,
-        points: user.points
-      }
+      _id: user._id,
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      university: user.university,
+      companyName: user.companyName,
+      branch: user.branch,
+      points: user.points,
+      bio: user.bio,
+      phone: user.phone,
+      course: user.course,
+      year: user.year,
+      profilePicture: user.profilePicture
     });
 
   } catch (error) {

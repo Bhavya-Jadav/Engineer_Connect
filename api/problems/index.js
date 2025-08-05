@@ -1,28 +1,4 @@
 // api/problems/index.js
-const mongoose = require('mongoose');
-
-// Import Problem model
-const Problem = require('../../server/models/Problem');
-
-// Connect to MongoDB
-let isConnected = false;
-
-const connectDB = async () => {
-  if (isConnected) return;
-  
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      bufferCommands: false,
-      maxPoolSize: 1,
-    });
-    isConnected = true;
-    console.log('✅ MongoDB connected for problems');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    throw error;
-  }
-};
-
 module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -34,11 +10,34 @@ module.exports = async (req, res) => {
   }
 
   try {
-    await connectDB();
+    // Import modules inside the function
+    const mongoose = require('mongoose');
+
+    // Connect to MongoDB
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(process.env.MONGO_URI, {
+        bufferCommands: false,
+        maxPoolSize: 1,
+      });
+    }
+
+    // Define Problem schema inline
+    const problemSchema = new mongoose.Schema({
+      title: String,
+      description: String,
+      category: String,
+      priority: String,
+      companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      status: { type: String, default: 'open' },
+      createdAt: { type: Date, default: Date.now },
+      updatedAt: { type: Date, default: Date.now }
+    });
+
+    const Problem = mongoose.models.Problem || mongoose.model('Problem', problemSchema);
 
     if (req.method === 'GET') {
       // Get all problems
-      const problems = await Problem.find().populate('companyId', 'name').sort({ createdAt: -1 });
+      const problems = await Problem.find().populate('companyId', 'username companyName').sort({ createdAt: -1 });
       return res.status(200).json(problems);
     }
 
@@ -60,7 +59,7 @@ module.exports = async (req, res) => {
       });
 
       await newProblem.save();
-      await newProblem.populate('companyId', 'name');
+      await newProblem.populate('companyId', 'username companyName');
 
       return res.status(201).json({
         message: 'Problem created successfully',
@@ -72,6 +71,6 @@ module.exports = async (req, res) => {
 
   } catch (error) {
     console.error('Problems API error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 };

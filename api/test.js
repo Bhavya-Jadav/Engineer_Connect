@@ -1,4 +1,4 @@
-// api/test.js
+// api/test.js - Simple test endpoint
 module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -13,6 +13,8 @@ module.exports = (req, res) => {
     method: req.method,
     url: req.url,
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    mongoUri: process.env.MONGO_URI ? 'Connected' : 'Not Set',
+    jwtSecret: process.env.JWT_SECRET ? 'Set' : 'Not Set'
   });
 };
