@@ -1,38 +1,10 @@
 {
-  "version": 2,
-  "builds": [
+  "buildCommand": "cd engineer_connect-app && npm run build",
+  "outputDirectory": "engineer_connect-app/build",
+  "rewrites": [
     {
-      "src": "engineer_connect-app/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "engineer_connect-app/build"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/users/login",
-      "dest": "/api/users/login.js"
-    },
-    {
-      "src": "/api/users/register",
-      "dest": "/api/users/register.js"
-    },
-    {
-      "src": "/api/problems",
-      "dest": "/api/problems/index.js"
-    },
-    {
-      "src": "/api/test",
-      "dest": "/api/test.js"
-    },
-    {
-      "src": "/api/hello",
-      "dest": "/api/hello.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/engineer_connect-app/build/index.html"
+      "source": "/((?!api/.*).*)",
+      "destination": "/index.html"
     }
   ]
 }
