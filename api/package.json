@@ -2,6 +2,7 @@
   "name": "engineer-connect-api",
   "version": "1.0.0",
   "description": "EngineerConnect API - Vercel Serverless Functions",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

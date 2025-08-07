@@ -1,4 +1,8 @@
 // api/users/login.js
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,11 +18,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Import modules inside the function to avoid cold start issues
-    const mongoose = require('mongoose');
-    const bcrypt = require('bcryptjs');
-    const jwt = require('jsonwebtoken');
-
     // Connect to MongoDB
     if (mongoose.connection.readyState === 0) {
       await mongoose.connect(process.env.MONGO_URI, {
