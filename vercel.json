@@ -1,6 +1,14 @@
 {
-  "buildCommand": "cd engineer_connect-app && npm run build",
-  "outputDirectory": "engineer_connect-app/build",
+  "version": 2,
+  "builds": [
+    {
+      "src": "engineer_connect-app/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api/.*).*)",
