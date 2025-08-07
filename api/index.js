@@ -62,7 +62,7 @@ app.use('/api/quiz', quizRoutes);
 app.use('/api/files', fileRoutes);
 
 // Export handler for Vercel
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   await connectDB();
   return app(req, res);
-};
+}
