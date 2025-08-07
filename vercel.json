@@ -11,8 +11,24 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
+      "src": "/api/users/login",
+      "dest": "/api/users/login.js"
+    },
+    {
+      "src": "/api/users/register",
+      "dest": "/api/users/register.js"
+    },
+    {
+      "src": "/api/problems",
+      "dest": "/api/problems/index.js"
+    },
+    {
+      "src": "/api/test",
+      "dest": "/api/test.js"
+    },
+    {
+      "src": "/api/hello",
+      "dest": "/api/hello.js"
     },
     {
       "src": "/(.*)",
