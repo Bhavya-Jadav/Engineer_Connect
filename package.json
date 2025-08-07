@@ -2,6 +2,7 @@
   "name": "engineer-connect-vercel",
   "version": "1.0.0",
   "description": "EngineerConnect Full-Stack App for Vercel",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "build": "cd engineer_connect-app && npm run build"
