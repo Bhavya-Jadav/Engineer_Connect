@@ -11,6 +11,10 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/engineer_connect-app/build/index.html"
     }
