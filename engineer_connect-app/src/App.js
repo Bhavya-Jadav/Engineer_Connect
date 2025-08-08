@@ -117,35 +117,59 @@ function AppContent() {
   const handleLogin = async (_username, _password) => {
   const username = _username || loginData.username;
   const password = _password || loginData.password;
-  try {
-    console.log("Login attempt with:", { username, password });
 
-    const response = await fetch('/api/users/login', {
+  try {
+    console.log('Login attempt with:', { username, password });
+    const response = await fetch(`${API_BASE_URL}/users/login`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: username,
-        password: password
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: username, password })
     });
 
-    console.log("Login response status:", response.status);
-    console.log("Login response ok:", response.ok);
+    console.log('Login response status:', response.status);
+    console.log('Login response ok:', response.ok);
 
     const data = await response.json();
-    console.log("Login response data:", data);
+    console.log('Login response data:', data);
 
     if (response.ok) {
-      alert('Login successful!');
-      // Save token or redirect logic here
+      const userData = {
+        _id: data._id,
+        username: data.username,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        university: data.university,
+        companyName: data.companyName,
+        profilePicture: data.profilePicture?.includes('placeholder') ? null : data.profilePicture,
+        phone: data.phone,
+        bio: data.bio,
+        course: data.course,
+        year: data.year,
+        skills: data.skills || []
+      };
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setIsLoggedIn(true);
+      setUserRole(data.role);
+      setCurrentUser(userData);
+
+      if (data.role === 'admin' || data.role === 'company') {
+        navigate('/dashboard');
+      } else {
+        navigate('/feed');
+      }
+      showNotification('Login successful!', 'success');
+      return true;
     } else {
-      alert(`Login failed: ${data.error || "Unknown error"}`);
+      showNotification(data.message || 'Login failed', 'error');
+      return false;
     }
   } catch (error) {
     console.error("Login error:", error);
-    alert("Login error: " + error.message);
+    showNotification('Login error occurred', 'error');
+    return false;
   }
 };
 

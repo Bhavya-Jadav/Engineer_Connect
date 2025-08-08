@@ -4,15 +4,14 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
+  console.log("LOGIN ENDPOINT HIT", req.method);
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     if (mongoose.connection.readyState === 0) {
@@ -59,17 +58,12 @@ export default async function handler(req, res) {
     }
 
     const token = jwt.sign(
-      { 
-        userId: user._id, 
-        username: user.username,
-        email: user.email,
-        role: user.role 
-      },
+      { userId: user._id, username: user.username, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    return res.status(200).json({
+    res.status(200).json({
       message: 'Login successful',
       token,
       _id: user._id,
@@ -90,6 +84,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Login error:', error);
-    return res.status(500).json({ error: 'Internal server error', details: error.message });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 }
