@@ -114,7 +114,9 @@ function AppContent() {
     }
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (_username, _password) => {
+  const username = _username || loginData.username;
+  const password = _password || loginData.password;
   try {
     console.log("Login attempt with:", { username, password });
 
