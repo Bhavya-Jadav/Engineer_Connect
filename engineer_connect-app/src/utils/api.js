@@ -43,4 +43,5 @@ export const apiCall = async (endpoint, options = {}) => {
   }
 };
 
-export default { API_BASE_URL, apiCall };
+const apiModule = { API_BASE_URL, apiCall };
+export default apiModule;
