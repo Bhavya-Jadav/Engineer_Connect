@@ -41,20 +41,26 @@ export default async function handler(req, res) {
 
     const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-    const { email: username, password } = req.body;
-
+    // Accept only username for login (since your user documents do not have email field)
+    const { username, password } = req.body;
+    console.log("🔐 LOGIN DEBUG - Attempting login for username:", username);
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
-
+    // Try to find user by username
     const user = await User.findOne({ username });
+    console.log("🔐 LOGIN DEBUG - User found:", user ? "YES" : "NO");
     if (!user) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      console.log("🔐 LOGIN DEBUG - Login FAILED - Invalid credentials");
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
-
+    console.log("🔐 LOGIN DEBUG - Password hash in DB:", user.password);
+    console.log("🔐 LOGIN DEBUG - Password provided:", password);
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log("🔐 LOGIN DEBUG - Password valid:", isPasswordValid);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      console.log("🔐 LOGIN DEBUG - Login FAILED - Invalid credentials");
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const token = jwt.sign(

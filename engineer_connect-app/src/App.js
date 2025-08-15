@@ -123,7 +123,7 @@ function AppContent() {
     const response = await fetch(`${API_BASE_URL}/users/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: username, password })
+      body: JSON.stringify({ username, password })
     });
 
     console.log('Login response status:', response.status);
