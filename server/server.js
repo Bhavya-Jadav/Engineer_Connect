@@ -20,24 +20,28 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- Middleware ---
-const corsOptions = require('./server-config');
+// CORS configuration for production
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // Allow any vercel.app domain or your specific domain
+        if (origin.includes('vercel.app')) {
+          return callback(null, true);
+        }
+        
+        callback(new Error('Not allowed by CORS'));
+      }
+    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
 
-// Handle OPTIONS preflight requests
-app.options('*', cors(corsOptions));
-
-// Enable CORS for all routes
-app.use(cors(corsOptions));
-
-// Add headers to all responses
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
-  next();
-});
-
-// Parse JSON bodies
-app.use(express.json());
+app.use(cors(corsOptions)); // Enable CORS with options
+app.use(express.json()); // Parse JSON bodies
 app.use(fileUpload({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   abortOnLimit: true,
