@@ -22,19 +22,19 @@ const PORT = process.env.PORT || 5000;
 // --- Middleware ---
 // CORS configuration for production
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        // Allow any vercel.app domain or your specific domain
-        if (origin.includes('vercel.app')) {
-          return callback(null, true);
-        }
-        
-        callback(new Error('Not allowed by CORS'));
-      }
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const allowed = [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      process.env.FRONTEND_URL,
+      process.env.VERCEL_URL
+    ].filter(Boolean);
+    if (origin.includes('vercel.app') || allowed.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

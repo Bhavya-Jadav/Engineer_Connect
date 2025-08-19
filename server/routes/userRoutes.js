@@ -8,6 +8,76 @@ const { protect } = require('../middleware/authMiddleware');
 const dotenv = require('dotenv');
 dotenv.config();
 
+// @desc    Google OAuth callback
+// @route   POST /api/users/google-auth
+// @access  Public
+router.post('/google-auth', async (req, res) => {
+  try {
+    const { googleId, email, name, picture } = req.body || {};
+
+    if (!googleId || !email) {
+      return res.status(400).json({ message: 'Google ID and email are required' });
+    }
+
+    // Try to find by googleId first
+    let user = await User.findOne({ googleId });
+
+    if (!user) {
+      // Link existing by email or create new
+      user = await User.findOne({ email });
+      if (user) {
+        user.googleId = googleId;
+        user.googleEmail = email;
+        user.googleName = name;
+        user.googlePicture = picture;
+        user.authMethod = 'google';
+        user.profilePicture = picture || user.profilePicture;
+        await user.save();
+      } else {
+        user = new User({
+          username: `google_${googleId.slice(-8)}`,
+          role: 'student',
+          university: '',
+          // Google fields
+          googleId,
+          googleEmail: email,
+          googleName: name,
+          googlePicture: picture,
+          // Profile
+          email,
+          name,
+          profilePicture: picture,
+          authMethod: 'google'
+        });
+        await user.save();
+      }
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    res.json({
+      _id: user._id,
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      university: user.university,
+      companyName: user.companyName,
+      profilePicture: user.profilePicture,
+      phone: user.phone,
+      bio: user.bio,
+      course: user.course,
+      year: user.year,
+      skills: user.skills || [],
+      authMethod: user.authMethod,
+      token,
+      message: 'Google authentication successful'
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(500).json({ message: 'Server Error during Google authentication' });
+  }
+});
+
 // @desc    Register a new user (Student or Admin signup)
 // @route   POST /api/users/register
 // @access  Public
